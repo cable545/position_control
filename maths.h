@@ -1,0 +1,9 @@
+#ifndef _MATHS_H
+#define _MATHS_H
+
+#define DEG_RAD 0.017453292519943f
+#define RAD_DEG 57.29577951308232f
+
+#define PI_f 3.14159265358979323846f
+
+#endif
