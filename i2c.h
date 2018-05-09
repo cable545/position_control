@@ -389,11 +389,11 @@ public:
 	
 	static bool writeBytes(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* value, uint32_t numBytes);
 	
-	static bool writeByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* byte);
+	static bool writeByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t byte);
 	
 	static bool readBytes(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* bytes, uint32_t numBytes);
 	
-	static uint8_t readByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr);
+	static bool readByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* byte);
 	
 };
 

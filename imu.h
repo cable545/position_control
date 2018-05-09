@@ -20,7 +20,8 @@ public:
 	virtual int init() = 0;                              // set up the IMU
 
 protected:
-	
+	void gyroBiasInit();
+
 	bool m_calibrationMode;	// true if cal mode so don't use cal data!
 	bool m_calibrationValid; 
 	bool m_gyroBiasValid;  
@@ -28,6 +29,9 @@ protected:
 
 	uint32_t m_sampleRate;											// samples per second
 	uint64_t m_sampleInterval;									// interval between samples in microseonds
+
+	float m_gyroAlpha;                          // gyro bias learning rate
+	uint32_t m_gyroSampleCount;                 // number of gyro samples used
 };
 
 #endif

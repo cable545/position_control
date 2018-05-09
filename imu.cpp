@@ -22,4 +22,10 @@ Imu::Imu(ImuSettings* settings)
 Imu::~Imu()
 {}
 */
+
+void Imu::gyroBiasInit()
+{
+	m_gyroAlpha = 2.0f / m_sampleRate;
+	m_gyroSampleCount = 0;
+}
 #endif

@@ -584,9 +584,9 @@ bool I2C::writeBytes(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uin
 	return true;
 }
 
-bool I2C::writeByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* byte)
+bool I2C::writeByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t byte)
 {
-	return I2C::writeBytes(I2Cx, deviceAddr, regAddr, byte, 1);
+	return I2C::writeBytes(I2Cx, deviceAddr, regAddr, &byte, 1);
 }
 
 bool I2C::readBytes(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* bytes, uint32_t numBytes)
@@ -612,13 +612,9 @@ bool I2C::readBytes(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint
 	return true;
 }
 
-uint8_t I2C::readByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr)
+bool I2C::readByte(I2C_TypeDef* I2Cx, uint8_t deviceAddr, uint8_t regAddr, uint8_t* byte)
 {
-	uint8_t byte;
-	
-	I2C::readBytes(I2Cx, deviceAddr, regAddr, &byte, 1);
-	
-	return byte;
+	return I2C::readBytes(I2Cx, deviceAddr, regAddr, byte, 1);
 }
 
 

@@ -72,20 +72,94 @@ int ImuMpu9250::init()
 	
 //	setCalibrationData();
 	
-//	I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_SMPRT_DIV, &tmpSampleRate);
+	// reset th mpu9250
 	
-	return 0;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_1, 0x80)) return -1;
+	
+	// delay(100);
+	
+	// is it necessary
+	// if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_1, 0x00)) return -4;
+	if(!I2C::readByte(IMU_I2C, m_slaveAddr, MPU9250_WHO_AM_I, &result)) return -5;
+	if(result != MPU9250_ID) return -6;
+	
+	// now configure the various components
+	
+	if(!setGyroConfig()) return -7;
+  if(!setAccelConfig()) return -8;
+	if(!setSampleRate()) return -9;
+	
+	//  now configure compass
+	
+	if(!bypassOn()) return -11;
+	
+	// get fuse ROM data
+	
+	if(!I2C::writeByte(IMU_I2C, AK8963_ADDRESS, AK8963_CNTL, 0))
+	{
+		bypassOff();
+		return -12;
+	}
+	
+	if(!I2C::writeByte(IMU_I2C, AK8963_ADDRESS, AK8963_CNTL, 0x0f))
+	{
+		bypassOff();
+		return -13;
+	}
+
+  if(!I2C::readBytes(IMU_I2C, AK8963_ADDRESS, AK8963_ASAX, asa, 3))
+	{
+		bypassOff();
+		return -14;
+	}
+	
+	//  convert asa to usable scale factor
+	
+	m_compassAdjust[0] = ((float)asa[0] - 128.0f) / 256.0f + 1.0f;
+	m_compassAdjust[1] = ((float)asa[1] - 128.0f) / 256.0f + 1.0f;
+  m_compassAdjust[2] = ((float)asa[2] - 128.0f) / 256.0f + 1.0f;
+	
+	if(!I2C::writeByte(IMU_I2C, AK8963_ADDRESS, AK8963_CNTL, 0))
+	{
+		bypassOff();
+		return -15;
+	}
+	
+	if(!bypassOff()) return -16;
+	
+	//  now set up MPU9250 to talk to the compass chip
+	
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_MST_CTRL, 0x40)) return -17;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV0_ADDR, 0x80 | AK8963_ADDRESS)) return -18;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV0_REG, AK8963_ST1)) return -19;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV0_CTRL, 0x88)) return -20;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV1_ADDR, AK8963_ADDRESS)) return -21;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV1_REG, AK8963_CNTL)) return -22;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV1_CTRL, 0x81)) return -23;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV1_DO, 0x1)) return -24;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_MST_DELAY_CTRL, 0x3)) return -25;
+	
+	if(!setCompassRate()) return -27;
+	
+	//  enable the sensors
+
+  if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_1, 1)) return -28;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_2, 0)) return -29;
+	
+	//  select the data to go into the FIFO and enable
+	
+	if(!resetFifo()) return -30;
+	
+	gyroBiasInit();
+	
+	return 1;
 }
 
 bool ImuMpu9250::setSampleRate()
 {
-	uint8_t tmpSampleRate;
-	
 	if(m_sampleRate > 1000) return true;                                        // SMPRT not used above 1000Hz
 	
-	tmpSampleRate = (uint8_t)(1000 / m_sampleRate - 1);
-	
-  I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_SMPRT_DIV, &tmpSampleRate);
+  I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_SMPLRT_DIV, (uint8_t)(1000 / m_sampleRate - 1));
 	
 	return true;
 }
@@ -134,12 +208,12 @@ bool ImuMpu9250::setAccelLpf(uint8_t lpf)
 {
 	switch(lpf)
 	{
-		case MPU9250_ACCEL_LPF_1130:
-		case MPU9250_ACCEL_LPF_460:
-		case MPU9250_ACCEL_LPF_184:
-		case MPU9250_ACCEL_LPF_92:
-		case MPU9250_ACCEL_LPF_41:
-    case MPU9250_ACCEL_LPF_20:
+		case MPU9250_ACCEL_LPF_1046:
+		case MPU9250_ACCEL_LPF_420:
+		case MPU9250_ACCEL_LPF_218:
+		case MPU9250_ACCEL_LPF_99:
+		case MPU9250_ACCEL_LPF_45:
+    case MPU9250_ACCEL_LPF_21:
     case MPU9250_ACCEL_LPF_10:
     case MPU9250_ACCEL_LPF_5:
 			m_accelLpf = lpf;
@@ -203,5 +277,86 @@ bool ImuMpu9250::setAccelFsr(uint8_t fsr)
 		
 		default: return false;
 	}
+}
+
+bool ImuMpu9250::setGyroConfig()
+{
+	uint8_t gyroConfig = m_gyroFsr + ((m_gyroLpf >> 3) & 3); // check output, not sure if the shift is correct
+  uint8_t gyroLpf = m_gyroLpf & 7;
+	
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_GYRO_CONFIG, gyroConfig)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_GYRO_LPF, gyroLpf)) return false;
+  
+	return true;
+}
+
+bool ImuMpu9250::setAccelConfig()
+{
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_ACCEL_CONFIG, m_accelFsr)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_ACCEL_LPF, m_accelLpf)) return false;
+	
+	return true;
+}
+
+bool ImuMpu9250::bypassOn()
+{
+	uint8_t userControl;
+	
+	if(!I2C::readByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, &userControl)) return false;
+	
+	userControl &= ~0x20;
+	userControl |= 2;
+	
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, userControl)) return false;
+//	delay(50);
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_PIN_CFG, 0x82)) return false;
+//	delay(50);
+
+	return true;
+}
+
+bool ImuMpu9250::bypassOff()
+{
+	uint8_t userControl;
+	
+	if(!I2C::readByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, &userControl)) return false;
+	
+	userControl |= 0x20;
+	
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, userControl)) return false;
+//	delay(50);
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_PIN_CFG, 0x80)) return false;
+//	delay(50);
+	
+	return true;
+}
+
+bool ImuMpu9250::setCompassRate()
+{
+	uint32_t rate;
+	
+	rate = m_sampleRate / m_compassRate - 1;
+	
+	if(rate > 31) rate = 31;
+	
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_I2C_SLV4_CTRL, rate)) return false;
+	
+	return true;
+}
+
+bool ImuMpu9250::resetFifo()
+{
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_ENABLE, 0)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_FIFO_EN, 0)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, 0)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, 0x04)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, 0x60)) return false;
+	
+//	delay(50);
+	
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_ENABLE, 1)) return false;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_FIFO_EN, 0x78)) return false;
+	
+	return true;
 }
 

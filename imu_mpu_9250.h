@@ -13,7 +13,7 @@
 
 #define AK8963_WHO_AM_I							0x00 // should return 0x48
 
-#define MPU9250_SMPRT_DIV						0x19
+#define MPU9250_SMPLRT_DIV					0x19
 #define MPU9250_GYRO_LPF            0x1a
 #define MPU9250_GYRO_CONFIG         0x1b
 #define MPU9250_ACCEL_CONFIG        0x1c
@@ -83,14 +83,21 @@
 
 //  Accel LPF options
 
-#define MPU9250_ACCEL_LPF_1130      0x08                    // 1130Hz, 0.75mS delay
-#define MPU9250_ACCEL_LPF_460       0x00                    // 460Hz, 1.94mS delay
-#define MPU9250_ACCEL_LPF_184       0x01                    // 184Hz, 5.80mS delay
-#define MPU9250_ACCEL_LPF_92        0x02                    // 92Hz, 7.80mS delay
-#define MPU9250_ACCEL_LPF_41        0x03                    // 41Hz, 11.80mS delay
-#define MPU9250_ACCEL_LPF_20        0x04                    // 20Hz, 19.80mS delay
-#define MPU9250_ACCEL_LPF_10        0x05                    // 10Hz, 35.70mS delay
-#define MPU9250_ACCEL_LPF_5         0x06                    // 5Hz, 66.96mS delay
+#define MPU9250_ACCEL_LPF_1046      0x08                    // 1046Hz, 0.50mS delay
+#define MPU9250_ACCEL_LPF_218       0x01                    // 218.1Hz, 1.88mS delay
+#define MPU9250_ACCEL_LPF_99        0x02                    // 99Hz, 2.88mS delay
+#define MPU9250_ACCEL_LPF_45        0x03                    // 44.8Hz, 4.88mS delay
+#define MPU9250_ACCEL_LPF_21        0x04                    // 21.2Hz, 8.87mS delay
+#define MPU9250_ACCEL_LPF_10        0x05                    // 10.2Hz, 16.83mS delay
+#define MPU9250_ACCEL_LPF_5         0x06                    // 5.05Hz, 32.48mS delay
+#define MPU9250_ACCEL_LPF_420       0x07                    // 420Hz, 1.38mS delay
+
+//  AK8963 compass registers
+
+#define AK8963_DEVICEID             0x48                    // the device ID
+#define AK8963_ST1                  0x02                    // status 1
+#define AK8963_CNTL                 0x0a                    // control reg
+#define AK8963_ASAX                 0x10                    // start of the fuse ROM data
 
 class ImuMpu9250 : public Imu
 {
@@ -111,7 +118,13 @@ public:
 	virtual int32_t init();
 	
 private:
+	bool setGyroConfig();
+	bool setAccelConfig();
 	bool setSampleRate();
+	bool bypassOn();
+	bool bypassOff();
+	bool setCompassRate();
+	bool resetFifo();
 
 	bool m_firstTime;							// if first sample
 
@@ -125,6 +138,8 @@ private:
 
 	float m_gyroScale;
 	float m_accelScale;
+
+	float m_compassAdjust[3];			// the compass fuse ROM values converted for use
 };
 
 #endif

@@ -19,9 +19,9 @@ class FRAM
 	public:
 		static void init();
 		static uint8_t readByte(uint16_t framAddr);
-		static void writeByte(uint16_t framAddr, uint8_t* value);
-		static void readBlock(uint16_t framAddr, uint8_t* value, int numBytes);
-		static void writeBlock(uint16_t framAddr, uint8_t* value, int numBytes);
+		static void writeByte(uint16_t framAddr, uint8_t value);
+		static void readBlock(uint16_t framAddr, uint8_t* value, uint32_t numBytes);
+		static void writeBlock(uint16_t framAddr, uint8_t* value, uint32_t numBytes);
 };
 
 #endif

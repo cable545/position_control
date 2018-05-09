@@ -39,15 +39,15 @@ int main(void)
 //		
 //		Debug::print("%c", value2);
 		
-		if(I2C::readByte(IMU_I2C, AK8963_ADDRESS, AK8963_WHO_AM_I) == 0x48)
-			Debug::print("AK8963 ist da\n");
-		else
-			Debug::print("AK8963 ist nicht da\n");
-		
-		if(I2C::readByte(IMU_I2C, MPU9250_ADDRESS0, MPU9250_WHO_AM_I) == 0x71)
-			Debug::print("MPU9250 ist da\n");
-		else
-			Debug::print("MPU9250 ist nicht da\n");
+//		if(I2C::readByte(IMU_I2C, AK8963_ADDRESS, AK8963_WHO_AM_I) == 0x48)
+//			Debug::print("AK8963 ist da\n");
+//		else
+//			Debug::print("AK8963 ist nicht da\n");
+//		
+//		if(I2C::readByte(IMU_I2C, MPU9250_ADDRESS0, MPU9250_WHO_AM_I) == 0x71)
+//			Debug::print("MPU9250 ist da\n");
+//		else
+//			Debug::print("MPU9250 ist nicht da\n");
 	
 //		Debug::print("hossa\n");
 //		I2C::scan(IMU_I2C);
