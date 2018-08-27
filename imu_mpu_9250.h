@@ -99,13 +99,15 @@
 #define AK8963_CNTL                 0x0a                    // control reg
 #define AK8963_ASAX                 0x10                    // start of the fuse ROM data
 
+//  FIFO transfer size
+
+#define MPU9250_FIFO_CHUNK_SIZE     12                      // gyro and accels take 12 bytes
+
 class ImuMpu9250 : public Imu
 {
 public:
 	ImuMpu9250(ImuSettings* settings);
 	~ImuMpu9250();
-
-	static bool lowLevelInit();
 
 	bool setGyroLpf(uint8_t lpf);
 	bool setAccelLpf(uint8_t lpf);
@@ -116,6 +118,8 @@ public:
 
 	virtual const char* name(){return "MPU_9250";}
 	virtual int32_t init();
+	virtual bool lowLevelInit();
+	virtual bool read();
 	
 private:
 	bool setGyroConfig();

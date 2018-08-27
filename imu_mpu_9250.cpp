@@ -1,5 +1,7 @@
 #include "main.h"
 
+#if defined(MPU9250_68) || defined(MPU9250_69)
+
 ImuMpu9250::ImuMpu9250(ImuSettings* settings) : Imu(settings)
 {}
 
@@ -59,6 +61,8 @@ int ImuMpu9250::init()
 	
 	m_firstTime = true;
 	
+	if(!lowLevelInit()) return -31;
+	
 	//  configure IMU
 	
 	m_slaveAddr = m_settings->m_i2cSlaveAddress;
@@ -72,14 +76,14 @@ int ImuMpu9250::init()
 	
 //	setCalibrationData();
 	
-	// reset th mpu9250
+	// reset the mpu9250
 	
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_1, 0x80)) return -1;
 	
-	// delay(100);
+	delay(100);
 	
 	// is it necessary
-	// if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_1, 0x00)) return -4;
+	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_PWR_MGMT_1, 0x00)) return -4;
 	if(!I2C::readByte(IMU_I2C, m_slaveAddr, MPU9250_WHO_AM_I, &result)) return -5;
 	if(result != MPU9250_ID) return -6;
 	
@@ -308,9 +312,9 @@ bool ImuMpu9250::bypassOn()
 	userControl |= 2;
 	
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, userControl)) return false;
-//	delay(50);
+	delay(50);
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_PIN_CFG, 0x82)) return false;
-//	delay(50);
+	delay(50);
 
 	return true;
 }
@@ -324,9 +328,9 @@ bool ImuMpu9250::bypassOff()
 	userControl |= 0x20;
 	
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, userControl)) return false;
-//	delay(50);
+	delay(50);
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_PIN_CFG, 0x80)) return false;
-//	delay(50);
+	delay(50);
 	
 	return true;
 }
@@ -352,11 +356,86 @@ bool ImuMpu9250::resetFifo()
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, 0x04)) return false;
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_USER_CTRL, 0x60)) return false;
 	
-//	delay(50);
+	delay(50);
 	
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_INT_ENABLE, 1)) return false;
 	if(!I2C::writeByte(IMU_I2C, m_slaveAddr, MPU9250_FIFO_EN, 0x78)) return false;
 	
 	return true;
 }
+
+bool ImuMpu9250::read()
+{
+	uint8_t fifoCount[2];
+	uint32_t count;
+  uint8_t fifoData[12];
+	uint8_t compassData[8];
+	
+	if(!I2C::readBytes(IMU_I2C, m_slaveAddr, MPU9250_FIFO_COUNT_H, fifoCount, 2)) return false;
+	
+	count = ((uint32_t)fifoCount[0] << 8) + fifoCount[1];
+	
+	if(count == 1024)
+	{
+		resetFifo();
+		m_timestamp += m_sampleInterval * (1024 / MPU9250_FIFO_CHUNK_SIZE + 1); // try to fix timestamp
+    
+		return false;
+	}
+
+	if(count > MPU9250_FIFO_CHUNK_SIZE * 40)
+	{
+		// more than 40 samples behind - going too slowly so discard some samples but maintain timestamp correctly
+		while(count >= MPU9250_FIFO_CHUNK_SIZE * 10)
+		{
+			if(!I2C::readBytes(IMU_I2C, m_slaveAddr, MPU9250_FIFO_R_W, fifoData, MPU9250_FIFO_CHUNK_SIZE)) return false;
+			
+			count -= MPU9250_FIFO_CHUNK_SIZE;
+			m_timestamp += m_sampleInterval;
+		}
+	}
+
+	if(count < MPU9250_FIFO_CHUNK_SIZE) return false;
+
+	if(!I2C::readBytes(IMU_I2C, m_slaveAddr, MPU9250_FIFO_R_W, fifoData, MPU9250_FIFO_CHUNK_SIZE)) return false;
+	if(!I2C::readBytes(IMU_I2C, m_slaveAddr, MPU9250_EXT_SENS_DATA_00, compassData, 8)) return false;
+
+	Maths::convertToVector(fifoData, m_accel, m_accelScale, true);
+	Maths::convertToVector(fifoData + 6, m_gyro, m_gyroScale, true);
+	Maths::convertToVector(compassData + 1, m_compass, 0.6f, false);
+	
+	// sort out gyro axes
+	m_gyro.setY(-m_gyro.y());
+	m_gyro.setZ(-m_gyro.z());
+
+	// sort out accel data;
+	m_accel.setX(-m_accel.x());
+
+	// use the fuse data adjustments for compass
+	m_compass.setX(m_compass.x() * m_compassAdjust[0]);
+	m_compass.setY(m_compass.y() * m_compassAdjust[1]);
+	m_compass.setZ(m_compass.z() * m_compassAdjust[2]);
+
+	// sort out compass axes
+	float temp;
+
+	temp = m_compass.x();
+	m_compass.setX(m_compass.y());
+	m_compass.setY(-temp);
+
+	// now do standard processing
+	handleGyroBias();
+	calibrateAverageCompass();
+
+	if(m_firstTime)
+		m_timestamp = millis();
+	else
+		m_timestamp += m_sampleInterval;
+	
+	m_firstTime = false;
+	
+	return true;
+}
+
+#endif
 

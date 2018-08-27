@@ -5,7 +5,7 @@ ImuSettings::ImuSettings()
 	m_imuType = -1;
 	m_i2cSlaveAddress = 0;
 	
-#ifdef MPU9250_68
+#if defined(MPU9250_68) || defined(MPU9250_69)
 	//  MPU9250 defaults
 	
 	m_MPU9250GyroAccelSampleRate = 80;

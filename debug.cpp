@@ -15,8 +15,7 @@ void Debug::print(const char* string, ...)
 	{
 		while(*traverse != '%') 
 		{ 
-			if(*traverse == '\0')
-				return;
+			if(*traverse == '\0') return;
 			
 			USART_SendData(USART2, *traverse);
 			
@@ -117,8 +116,7 @@ uint32_t Debug::intToStr(int32_t x, uint8_t string[], uint32_t d)
 	
 	// if number of digits requied more than digits needed,
 	// then add '0' at the beginning
-	while(i < d)
-		string[i++] = '0';
+	while(i < d) string[i++] = '0';
 	
 	reverse(string, i);
 	string[i] = '\0';
@@ -128,10 +126,15 @@ uint32_t Debug::intToStr(int32_t x, uint8_t string[], uint32_t d)
 
 void Debug::ftoa(float n, uint8_t string[], uint8_t afterpoint)
 {
+	int i = 0;
+	
 	int ipart = (int)n;
 	float fpart = n - (float)ipart;
 	
-	int i = intToStr(ipart, string, 0);
+	if(ipart == 0)
+		string[i++] = '0';
+	else
+		i = intToStr(ipart, string, 0);
 	
 	if(afterpoint != 0)
 	{
