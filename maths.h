@@ -16,6 +16,8 @@ public:
 	static void convertToVector(uint8_t* rawData, Vector& vector, float scale, bool bigEndian);
 
 	static void display(const char* label, const Vector& vector);
+
+	static int32_t map(int32_t x, int32_t inMin, int32_t inMax, int32_t outMin, int32_t outMax);
 };
 
 class Vector

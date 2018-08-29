@@ -1,19 +1,29 @@
 #include "main.h"
 
-uint32_t Receiver::capturredValue;
+uint32_t Receiver::capturredValue[4];
 
 extern "C"
 {
+		static uint32_t sumSignalIndex = 0;
+	
    void TIM1_CC_IRQHandler()
 	{
 		if(Timer::getInterruptStatus(RECEIVER_TIMER, TIM_IT_CC1) == SET)
 		{
+			uint32_t tmp;
+			
 			Timer::clearInterruptPendingBit(RECEIVER_TIMER, TIM_IT_CC1);
 			RECEIVER_TIMER->CNT = 0x0;
-			Receiver::capturredValue = Timer::getCapture1(RECEIVER_TIMER);
+			tmp = Timer::getCapture1(RECEIVER_TIMER);
 			
-			
-			Debug::print("%i\n", Receiver::capturredValue);	
+			if(tmp > 2000)
+			{
+				sumSignalIndex = 0;
+			}
+			else
+			{
+				Receiver::capturredValue[sumSignalIndex++] = tmp;
+			}
 		}
 	}
 }
@@ -48,7 +58,8 @@ void Receiver::init()
   Interrupt::init(&NVIC_InitStruct);
 	
 	Timer::structInit(&TIM_TimeBaseStruct);
-	TIM_TimeBaseStruct.TIM_Prescaler = 45000;
+	TIM_TimeBaseStruct.TIM_Prescaler = RECEIVER_TIMER_PRESCALER;
+	Timer::timeBaseInit(RECEIVER_TIMER, &TIM_TimeBaseStruct);
 	
 	Timer::icStructInit(&TIM_ICInitStruct);
 	TIM_ICInitStruct.TIM_Channel = RECEIVER_TIMER_CHANNEL;

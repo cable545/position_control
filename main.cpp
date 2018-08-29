@@ -99,6 +99,8 @@ int main(void)
 
 	while(true)
 	{
+		Debug::print("%i   %i   %i   %i\n", Receiver::capturredValue[0], Receiver::capturredValue[1], Receiver::capturredValue[2], Receiver::capturredValue[3]);
+		
 #ifdef BNO080_IMU
 //		imu.start
 		

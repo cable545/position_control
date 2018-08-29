@@ -23,6 +23,14 @@ void Maths::display(const char* label, const Vector& vector)
   Debug::print(" y:"); Debug::print("%f\n", vector.y());
 	Debug::print(" z:"); Debug::print("%f\n", vector.z());
 }
+/*
+ * maps the given input value x from the given input range inMin to inMax on a value between
+ * the given output range outMin to outMax
+ */
+int32_t Maths::map(int32_t x, int32_t inMin, int32_t inMax, int32_t outMin, int32_t outMax)
+{
+  return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
 
 //-------------------------------- Vector class --------------------------------------//
 
