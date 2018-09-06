@@ -93,14 +93,20 @@ int main(void)
 
 	Debug::print("Start\n");
 
-	Receiver::init();
-	
-	Debug::print("receiver initialized\n");
+	if(Receiver::init(false, true) == EXIT_SUCCESS)
+	{
+		Debug::print("receiver initialized\n");
+	}
+	else
+	{
+		Debug::print("failed to initialize receiver\n");
+	}
 
 	while(true)
 	{
-		Debug::print("%i   %i   %i   %i\n", Receiver::capturredValue[0], Receiver::capturredValue[1], Receiver::capturredValue[2], Receiver::capturredValue[3]);
-		
+//		Debug::print("%i\n", tmp);
+		Receiver::getCapturedValues();
+//		Debug::print("%i   %i   %i   %i\n", Receiver::capturredValue[0], Receiver::capturredValue[1], Receiver::capturredValue[2], Receiver::capturredValue[3]);
 #ifdef BNO080_IMU
 //		imu.start
 		

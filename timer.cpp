@@ -600,4 +600,72 @@ void Timer::clearInterruptPendingBit(TIM_TypeDef* TIMx, uint16_t TIM_IT)
   TIMx->SR = (uint16_t)~TIM_IT;
 }
 
+/**
+  * Enables the TIMx's DMA Requests.
+  * TIMx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the TIM peripheral.
+  * TIM_DMASource: specifies the DMA Request sources.
+  * 	This parameter can be any combination of the following values:
+  *   	TIM_DMA_Update: TIM update Interrupt source
+  *     TIM_DMA_CC1: TIM Capture Compare 1 DMA source
+  *     TIM_DMA_CC2: TIM Capture Compare 2 DMA source
+  *     TIM_DMA_CC3: TIM Capture Compare 3 DMA source
+  *     TIM_DMA_CC4: TIM Capture Compare 4 DMA source
+  *     TIM_DMA_COM: TIM Commutation DMA source
+  *     TIM_DMA_Trigger: TIM Trigger DMA source
+  */
+void Timer::enableDMA(TIM_TypeDef* TIMx, uint16_t TIM_DMASource)
+{ 
+	TIMx->DIER |= TIM_DMASource; 
+}
+
+/**
+  * Disables the TIMx's DMA Requests.
+  * TIMx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the TIM peripheral.
+  * TIM_DMASource: specifies the DMA Request sources.
+  * 	This parameter can be any combination of the following values:
+  *   	TIM_DMA_Update: TIM update Interrupt source
+  *     TIM_DMA_CC1: TIM Capture Compare 1 DMA source
+  *     TIM_DMA_CC2: TIM Capture Compare 2 DMA source
+  *     TIM_DMA_CC3: TIM Capture Compare 3 DMA source
+  *     TIM_DMA_CC4: TIM Capture Compare 4 DMA source
+  *     TIM_DMA_COM: TIM Commutation DMA source
+  *     TIM_DMA_Trigger: TIM Trigger DMA source
+  */
+void Timer::disableDMA(TIM_TypeDef* TIMx, uint16_t TIM_DMASource)
+{ 
+	TIMx->DIER &= (uint16_t)~TIM_DMASource;
+}
+
+/*
+ * Configures the TIMx's DMA interface.
+ * TIMx: where x can be 1, 2, 3, 4, 5 or 8 to select the TIM peripheral.
+ * TIM_DMABase: DMA Base address.
+ * 	This parameter can be one of the following values:
+ *   	TIM_DMABase_CR1  
+ *     TIM_DMABase_CR2
+ *     TIM_DMABase_SMCR
+ *			TIM_DMABase_DIER
+ *			TIM1_DMABase_SR
+ *			TIM_DMABase_EGR
+ *			TIM_DMABase_CCMR1
+ *			TIM_DMABase_CCMR2
+ *			TIM_DMABase_CCER
+ *			TIM_DMABase_CNT   
+ *			TIM_DMABase_PSC   
+ *			TIM_DMABase_ARR
+ *			TIM_DMABase_RCR
+ *			TIM_DMABase_CCR1
+ *			TIM_DMABase_CCR2
+ *			TIM_DMABase_CCR3  
+ *			TIM_DMABase_CCR4
+ *			TIM_DMABase_BDTR
+ *			TIM_DMABase_DCR
+ * TIM_DMABurstLength: DMA Burst length. This parameter can be one value
+ * between: TIM_DMABurstLength_1Transfer and TIM_DMABurstLength_18Transfers.
+ */
+void Timer::configDMA(TIM_TypeDef* TIMx, uint16_t TIM_DMABase, uint16_t TIM_DMABurstLength)
+{
+  TIMx->DCR = TIM_DMABase | TIM_DMABurstLength;
+}
+
 

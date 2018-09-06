@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <math.h>
+#include <string.h>
 #include "stm32f4xx.h"
 #include "rcc.h"
 #include "usart.h"
@@ -16,6 +17,7 @@
 #include "buzzer.h"
 #include "timer.h"
 #include "interrupt.h"
+#include "dma.h"
 
 #include "imu_defs.h"
 #include "imu_settings.h"
@@ -28,13 +30,14 @@
 #include "unity/unity.h"
 #include <setjmp.h>
 
-#define EXIT_SUCCESS 						0
-#define	I2C_START_ERROR					1
-#define	I2C_READ_ACK_ERROR			2
-#define	I2C_READ_NACK_ERROR			3
-#define I2C_WRITE_ERROR					4
-#define	I2C_STOP_ERROR					5
-#define BUZZER_NOT_INITIALIZED	6
+#define EXIT_SUCCESS 									0
+#define	I2C_START_ERROR								1
+#define	I2C_READ_ACK_ERROR						2
+#define	I2C_READ_NACK_ERROR						3
+#define I2C_WRITE_ERROR								4
+#define	I2C_STOP_ERROR								5
+#define BUZZER_NOT_INITIALIZED				6
+#define RECEIVER_INT_AND_DMA_ENABLED	7
 
 extern const char* RETURN_VALUES[];
 
