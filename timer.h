@@ -31,6 +31,40 @@ typedef struct
 } TIM_TimeBaseInitTypeDef;
 
 /* 
+ * TIM Output Compare Init structure definition  
+ */
+typedef struct
+{
+  uint16_t TIM_OCMode;        /*!< Specifies the TIM mode.
+                                   This parameter can be a value of @ref TIM_Output_Compare_and_PWM_modes */
+
+  uint16_t TIM_OutputState;   /*!< Specifies the TIM Output Compare state.
+                                   This parameter can be a value of @ref TIM_Output_Compare_State */
+
+  uint16_t TIM_OutputNState;  /*!< Specifies the TIM complementary Output Compare state.
+                                   This parameter can be a value of @ref TIM_Output_Compare_N_State
+                                   @note This parameter is valid only for TIM1 and TIM8. */
+
+  uint32_t TIM_Pulse;         /*!< Specifies the pulse value to be loaded into the Capture Compare Register. 
+                                   This parameter can be a number between 0x0000 and 0xFFFF */
+
+  uint16_t TIM_OCPolarity;    /*!< Specifies the output polarity.
+                                   This parameter can be a value of @ref TIM_Output_Compare_Polarity */
+
+  uint16_t TIM_OCNPolarity;   /*!< Specifies the complementary output polarity.
+                                   This parameter can be a value of @ref TIM_Output_Compare_N_Polarity
+                                   @note This parameter is valid only for TIM1 and TIM8. */
+
+  uint16_t TIM_OCIdleState;   /*!< Specifies the TIM Output Compare pin state during Idle state.
+                                   This parameter can be a value of @ref TIM_Output_Compare_Idle_State
+                                   @note This parameter is valid only for TIM1 and TIM8. */
+
+  uint16_t TIM_OCNIdleState;  /*!< Specifies the TIM Output Compare pin state during Idle state.
+                                   This parameter can be a value of @ref TIM_Output_Compare_N_Idle_State
+                                   @note This parameter is valid only for TIM1 and TIM8. */
+} TIM_OCInitTypeDef;
+
+/* 
  * TIM Input Capture Init structure definition  
  */
 typedef struct
@@ -82,6 +116,59 @@ typedef struct
 #define  TIM_ICPolarity_Rising             ((uint16_t)0x0000)
 #define  TIM_ICPolarity_Falling            ((uint16_t)0x0002)
 #define  TIM_ICPolarity_BothEdge           ((uint16_t)0x000A)
+
+/* 
+ * TIM_Output_Compare_and_PWM_modes 
+ */
+#define TIM_OCMode_Timing                  ((uint16_t)0x0000)
+#define TIM_OCMode_Active                  ((uint16_t)0x0010)
+#define TIM_OCMode_Inactive                ((uint16_t)0x0020)
+#define TIM_OCMode_Toggle                  ((uint16_t)0x0030)
+#define TIM_OCMode_PWM1                    ((uint16_t)0x0060)
+#define TIM_OCMode_PWM2                    ((uint16_t)0x0070)
+
+/*
+ * TIM_Output_Compare_Polarity 
+ */
+#define TIM_OCPolarity_High                ((uint16_t)0x0000)
+#define TIM_OCPolarity_Low                 ((uint16_t)0x0002)
+
+/* 
+ * TIM_Output_Compare_N_Polarity 
+ */
+#define TIM_OCNPolarity_High               ((uint16_t)0x0000)
+#define TIM_OCNPolarity_Low                ((uint16_t)0x0008)
+
+/*
+ * TIM_Output_Compare_State 
+ */
+#define TIM_OutputState_Disable            ((uint16_t)0x0000)
+#define TIM_OutputState_Enable             ((uint16_t)0x0001)
+
+/*
+ * TIM_Output_Compare_N_State
+ */
+#define TIM_OutputNState_Disable           ((uint16_t)0x0000)
+#define TIM_OutputNState_Enable            ((uint16_t)0x0004)
+
+/*
+ * TIM_Output_Compare_Idle_State 
+ */
+#define TIM_OCIdleState_Set                ((uint16_t)0x0100)
+#define TIM_OCIdleState_Reset              ((uint16_t)0x0000)
+#define IS_TIM_OCIDLE_STATE(STATE) (((STATE) == TIM_OCIdleState_Set) || \
+                                    ((STATE) == TIM_OCIdleState_Reset))
+/*
+ * TIM_Output_Compare_N_Idle_State 
+ */
+#define TIM_OCNIdleState_Set               ((uint16_t)0x0200)
+#define TIM_OCNIdleState_Reset             ((uint16_t)0x0000)
+
+/*
+ * TIM_Output_Compare_Preload_State 
+ */
+#define TIM_OCPreload_Enable               ((uint16_t)0x0008)
+#define TIM_OCPreload_Disable              ((uint16_t)0x0000)
 
 /* 
  * TIM_Input_Capture_Selection 
@@ -186,6 +273,7 @@ class Timer
 		static void timeBaseInit(TIM_TypeDef* TIMx, TIM_TimeBaseInitTypeDef* TIM_TimeBaseInitStruct);
 		static void enable(TIM_TypeDef* TIMx);
 		static void disable(TIM_TypeDef* TIMx);
+		static void arrPreloadConfig(TIM_TypeDef* TIMx, FunctionalState NewState);
 	
 		static void icStructInit(TIM_ICInitTypeDef* icInitStruct);
 		static void icInit(TIM_TypeDef* TIMx, TIM_ICInitTypeDef* icInitStruct);
@@ -193,6 +281,16 @@ class Timer
 		static void setIC2Prescaler(TIM_TypeDef* TIMx, uint16_t TIM_ICPSC);
 		static void setIC3Prescaler(TIM_TypeDef* TIMx, uint16_t TIM_ICPSC);
 		static void setIC4Prescaler(TIM_TypeDef* TIMx, uint16_t TIM_ICPSC);
+	
+		static void ocStructInit(TIM_OCInitTypeDef* TIM_OCInitStruct);
+		static void oc1Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct);
+		static void oc2Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct);
+		static void oc3Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct);
+		static void oc4Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct);
+		static void oc1PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload);
+		static void oc2PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload);
+		static void oc3PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload);
+		static void oc4PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload);
 	
 		static uint32_t getCapture1(TIM_TypeDef* TIMx);
 		static uint32_t getCapture2(TIM_TypeDef* TIMx);
