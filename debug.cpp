@@ -2,14 +2,28 @@
 
 void Debug::print(const char* string, ...)
 {
+	va_list arg;
+	va_start(arg, string);
+	out(string, arg);
+	va_end(arg);
+}
+
+void Debug::println(const char* string, ...)
+{
+	va_list arg;
+	va_start(arg, string);
+	out(string, arg);
+	USART_SendData(USART2, '\n');
+	va_end(arg);
+}
+
+void Debug::out(const char* string, va_list arg)
+{
 	const char* traverse;
 	int32_t i;
 	float f;
 	uint8_t* s;
 	uint8_t buffer[20];
-	
-	va_list arg;
-	va_start(arg, string);
 	
 	for(traverse = string; *traverse != '\0'; traverse++)
 	{
@@ -69,8 +83,6 @@ void Debug::print(const char* string, ...)
 				break;
 		}
 	}
-	
-	va_end(arg);
 }
 
 uint8_t* Debug::convert(uint32_t num, int32_t base)
