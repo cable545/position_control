@@ -4,13 +4,13 @@
 /***************** constants for application software *******************/
 
 // a ic value of CHANNEL_VALUE_COUNT_MIN means a signal length of 1,0 ms
-#define CHANNEL_VALUE_COUNT_MIN				1000
+#define CHANNEL_VALUE_COUNT_MIN				PWM_1_0_MS
 
 // a ic value of CHANNEL_VALUE_MIDDLE means a signal length of 1,5 ms
-#define CHANNEL_VALUE_MIDDLE					1500
+#define CHANNEL_VALUE_MIDDLE					PWM_1_5_MS
 
 // a ic value of CHANNEL_VALUE_COUNT_MAX means a signal length of 2,0 ms
-#define CHANNEL_VALUE_COUNT_MAX				2000
+#define CHANNEL_VALUE_COUNT_MAX				PWM_2_0_MS
 
 // the number of control channels
 #define RECEIVER_CHANNEL_CNT					4
@@ -58,11 +58,14 @@
 
 typedef struct
 {
-	uint32_t elevator;
-	uint32_t roll;
-	uint32_t pitch;
-	uint32_t yaw;
-} TargetValues;
+	int32_t elevator;
+	uint32_t rollRaw;
+	uint32_t pitchRaw;
+	uint32_t yawRaw;
+	int32_t rollAngle;
+	int32_t pitchAngle;
+	int32_t yawAngle;
+} TargetValues_t;
 
 typedef union {
 	uint32_t value;
@@ -71,25 +74,38 @@ typedef union {
 
 class Receiver
 {
-	private:
-		static void initGPIO();
-		static void initInterrupt();
-		static void initDMAInterrupt();
-		static uint32_t initTimer(bool enableInterrupt, bool enableDMA);
-		static void initDMA();
-		static bool isControlSignalValue(uint32_t value);
-		static bool isSyncSignalValue(uint32_t value);
-		static void fillTargetValues();
+public:
+	static Receiver& instance();
+	~Receiver() {}
+		
+	uint32_t init(bool enableInterrupt, bool enableDMA);
 	
-	public:
-		static uint32_t init(bool enableInterrupt, bool enableDMA);
-		static bool processCapturedValues();
+	bool processCapturedValues();
+	bool isBufferFull() {return bufferFull;}
+	void setBufferFull(bool value) {bufferFull = value;}
+	bool addCapturedValue(uint32_t value, uint32_t index);
+	TargetValues_t* getTargetValues() {return &targetValues;}
+	uint32_t* getCapturedValues() {return capturedValues;}
+		
+private:
+	Receiver() {}
+	Receiver(const Receiver&);
+	Receiver & operator = (const Receiver &);
 	
-		static uint32_t capturedValue[CAPTURE_VALUE_TARGET_CNT];
-		static uint32_t capturedValues[CAPTURE_VALUE_TARGET_CNT];
-		static TargetValues targetValues;
-		static uint32_t values[RECEIVER_CHANNEL_CNT];
-		static bool bufferFull;
+	void initGPIO();
+	void initInterrupt();
+	void initDMAInterrupt();
+	uint32_t initTimer(bool enableInterrupt, bool enableDMA);
+	void initDMA();
+	
+	bool isControlSignalValue(uint32_t value);
+	bool isSyncSignalValue(uint32_t value);
+	void fillTargetValues();
+		
+	uint32_t capturedValues[CAPTURE_VALUE_TARGET_CNT];
+	uint32_t processedValues[RECEIVER_CHANNEL_CNT];
+	bool bufferFull;
+	TargetValues_t targetValues;
 };
 
 #endif

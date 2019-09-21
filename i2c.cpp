@@ -311,7 +311,11 @@ bool I2C::start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction)
 	// wait until I2C1 is not busy any more
 	while(I2C::getFlagStatus(I2Cx, I2C_FLAG_BUSY))
 	{
-		if(--timeout == 0) return false;
+		if(--timeout == 0)
+		{
+			Debug::println("1");
+			return false;
+		}
 	}
  
 	// Send I2C1 START condition
@@ -321,9 +325,13 @@ bool I2C::start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction)
 	// wait for I2C1 EV5 --> Slave has acknowledged start condition
   while(!I2C::checkEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT))
 	{
-		if(--timeout == 0) return false;
+		if(--timeout == 0)
+		{
+			Debug::println("2");
+			return false;
+		}
 	}
- 
+  
 	// Send slave Address for write
 	send7bitAddress(I2Cx, address, direction);
  
@@ -337,14 +345,22 @@ bool I2C::start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction)
 	{
 		while(!I2C::checkEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
 		{
-			if(--timeout == 0) return false;
+			if(--timeout == 0)
+			{
+				Debug::println("3");
+				return false;
+			}
 		}
 	}
 	else if(direction == I2C_Direction_Receiver)
 	{
 		while(!I2C::checkEvent(I2Cx, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
 		{
-			if(--timeout == 0) return false;
+			if(--timeout == 0)
+			{
+				Debug::println("4");
+				return false;
+			}
 		}
 	}
 	

@@ -101,6 +101,19 @@
 #define RCC_APB2Periph_SAI2              ((uint32_t)0x00800000)
 #define RCC_APB2Periph_LTDC              ((uint32_t)0x04000000)
 
+/** @defgroup RCC_MCO2_Clock_Source_Prescaler
+  * @{
+  */
+#define RCC_MCO2Source_SYSCLK            ((uint32_t)0x00000000)
+#define RCC_MCO2Source_PLLI2SCLK         ((uint32_t)0x40000000)
+#define RCC_MCO2Source_HSE               ((uint32_t)0x80000000)
+#define RCC_MCO2Source_PLLCLK            ((uint32_t)0xC0000000)
+#define RCC_MCO2Div_1                    ((uint32_t)0x00000000)
+#define RCC_MCO2Div_2                    ((uint32_t)0x20000000)
+#define RCC_MCO2Div_3                    ((uint32_t)0x28000000)
+#define RCC_MCO2Div_4                    ((uint32_t)0x30000000)
+#define RCC_MCO2Div_5                    ((uint32_t)0x38000000)
+
 typedef struct
 {
   uint32_t SYSCLK_Frequency; /*!<  SYSCLK clock frequency expressed in Hz */
@@ -115,6 +128,7 @@ void RCC_APB2PeriphClockCmd(uint32_t RCC_APB2Periph, FunctionalState NewState);
 void RCC_APB1PeriphResetCmd(uint32_t RCC_APB1Periph, FunctionalState NewState);
 void RCC_APB2PeriphResetCmd(uint32_t RCC_APB2Periph, FunctionalState NewState);
 void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks);
+void RCC_MCO2Config(uint32_t RCC_MCO2Source, uint32_t RCC_MCO2Div);
 
 
 #ifdef __cplusplus

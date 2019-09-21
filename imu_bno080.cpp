@@ -79,15 +79,17 @@ bool IMU_BNO080::lowLevelInit()
 
 // Attempt communication with the device
 // Return true if we got a 'Polo' back from Marco
-bool IMU_BNO080::begin()
+bool IMU_BNO080::begin(bool executeLowLevelInit)
 {
 	uint32_t result;
 
-	if(!lowLevelInit()) return false;
+	if(executeLowLevelInit)
+	{
+		if(!lowLevelInit()) return false;
+	}
 
 	// execute hardware reset per low signal on rst pin
 	hardReset();
-	
 	
 	// Begin by resetting the IMU
 //	if(!softReset()) return false;
@@ -124,11 +126,16 @@ bool IMU_BNO080::begin()
 	return false; // Something went wrong
 }
 
+void IMU_BNO080::readImuData(ImuData* actualImuData)
+{
+	
+}
+
 void IMU_BNO080::hardReset()
 {
-	BNO080_RESET_GPIO_PORT->BSRR = GPIO_BSRR_BR_6;
+	BNO080_RESET_GPIO_PORT->BSRR = GPIO_BSRR_BR_15;
 	delay(10);
-	BNO080_RESET_GPIO_PORT->BSRR = GPIO_BSRR_BS_6;
+	BNO080_RESET_GPIO_PORT->BSRR = GPIO_BSRR_BS_15;
 	delay(100);
 	
 	while(receivePacket());
@@ -149,8 +156,6 @@ bool IMU_BNO080::dataAvailable()
 {
 	if(receivePacket())
 	{
-//		Debug::print("data available shtpHeader[2]: %i shtpData[0]: %x\n", shtpHeader[2], shtpData[0]);
-		
 		// Check to see if this packet is a sensor reporting its data to us
 		if(shtpHeader[2] == CHANNEL_REPORTS && shtpData[0] == SHTP_REPORT_BASE_TIMESTAMP)
 		{
@@ -763,7 +768,6 @@ void IMU_BNO080::endCalibration()
 	sendCalibrateCommand(CALIBRATE_STOP); // Disables all calibrations
 }
 
-
 // Given a sensor's report ID, this tells the BNO080 to begin reporting the values
 void IMU_BNO080::setFeatureCommand(uint8_t reportID, uint16_t timeBetweenReports)
 {
@@ -892,6 +896,7 @@ bool IMU_BNO080::receivePacket()
 	if(result != EXIT_SUCCESS)
 	{
 		Debug::print("readHeader() returns %s in receivePacket()\n", RETURN_VALUES[result]);
+		begin(false);
 		return false;
 	}
 	
@@ -911,6 +916,7 @@ bool IMU_BNO080::receivePacket()
 	if(result != EXIT_SUCCESS)
 	{
 		Debug::print("getData() returns %s in receivePacket()\n", RETURN_VALUES[result]);
+		begin(false);
 		return false;
 	}
 
@@ -1004,8 +1010,6 @@ uint32_t IMU_BNO080::sendPacket(uint8_t channelNumber, uint8_t dataLength)
 	header[1] = packetLength >> 8;
 	header[2] = channelNumber;
 	header[3] = sequenceNumber[channelNumber]++;
-	
-//	Debug::print("%x   %x\n", shtpData[0], shtpData[1]);
 	
 	if(!I2C::start(IMU_I2C, _deviceAddress, I2C_Direction_Transmitter)) return I2C_START_ERROR;
 	

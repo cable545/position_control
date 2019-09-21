@@ -1,5 +1,8 @@
 #include "main.h"
 
+/* CFGR register bit mask */
+#define CFGR_MCO2_RESET_MASK      ((uint32_t)0x07FFFFFF)
+
 /* Private variables ---------------------------------------------------------*/
 static __I uint8_t APBAHBPrescTable[16] = {0, 0, 0, 0, 1, 2, 3, 4, 1, 2, 3, 4, 6, 7, 8, 9};
 
@@ -267,5 +270,42 @@ void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks)
   presc = APBAHBPrescTable[tmp];
   /* PCLK2 clock frequency */
   RCC_Clocks->PCLK2_Frequency = RCC_Clocks->HCLK_Frequency >> presc;
+}
+
+/**
+  * @brief  Selects the clock source to output on MCO2 pin(PC9).
+  * @note   PC9 should be configured in alternate function mode.
+  * @param  RCC_MCO2Source: specifies the clock source to output.
+  *          This parameter can be one of the following values:
+  *            @arg RCC_MCO2Source_SYSCLK: System clock (SYSCLK) selected as MCO2 source
+  *            @arg RCC_MCO2SOURCE_PLLI2SCLK: PLLI2S clock selected as MCO2 source, available for all STM32F4 devices except STM32F410xx 
+  *            @arg RCC_MCO2SOURCE_I2SCLK: I2SCLK clock selected as MCO2 source, available only for STM32F410xx devices   
+  *            @arg RCC_MCO2Source_HSE: HSE clock selected as MCO2 source
+  *            @arg RCC_MCO2Source_PLLCLK: main PLL clock selected as MCO2 source
+  * @param  RCC_MCO2Div: specifies the MCO2 prescaler.
+  *          This parameter can be one of the following values:
+  *            @arg RCC_MCO2Div_1: no division applied to MCO2 clock
+  *            @arg RCC_MCO2Div_2: division by 2 applied to MCO2 clock
+  *            @arg RCC_MCO2Div_3: division by 3 applied to MCO2 clock
+  *            @arg RCC_MCO2Div_4: division by 4 applied to MCO2 clock
+  *            @arg RCC_MCO2Div_5: division by 5 applied to MCO2 clock
+  * @note  For STM32F410xx devices to output I2SCLK clock on MCO2 you should have
+  *        at last one of the SPI clocks enabled (SPI1, SPI2 or SPI5).
+  * @retval None
+  */
+void RCC_MCO2Config(uint32_t RCC_MCO2Source, uint32_t RCC_MCO2Div)
+{
+  uint32_t tmpreg = 0;
+
+  tmpreg = RCC->CFGR;
+  
+  /* Clear MCO2 and MCO2PRE[2:0] bits */
+  tmpreg &= CFGR_MCO2_RESET_MASK;
+
+  /* Select MCO2 clock source and prescaler */
+  tmpreg |= RCC_MCO2Source | RCC_MCO2Div;
+  
+  /* Store the new value */
+  RCC->CFGR = tmpreg;
 }
 

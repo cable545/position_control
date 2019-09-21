@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <math.h>
-#include <string.h>
+//#include <string.h>
 #include "stm32f4xx.h"
 #include "rcc.h"
 #include "usart.h"
@@ -25,6 +25,8 @@
 #include "fusion.h"
 
 #include "receiver.h"
+#include "motor_driver.h"
+#include "controller.h"
 
 #include "unity_run.h"
 #include "unity/unity.h"
@@ -38,6 +40,8 @@
 #define	I2C_STOP_ERROR								5
 #define BUZZER_NOT_INITIALIZED				6
 #define RECEIVER_INT_AND_DMA_ENABLED	7
+
+
 
 extern const char* RETURN_VALUES[];
 

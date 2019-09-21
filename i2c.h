@@ -160,7 +160,7 @@ typedef struct
 /* --EV9 */
 #define  I2C_EVENT_MASTER_MODE_ADDRESS10                   ((uint32_t)0x00030008)  /* BUSY, MSL and ADD10 flags */
 
-#define FLAG_TIMEOUT						0x10000
+#define FLAG_TIMEOUT						0x50000
 #define LONG_TIMEOUT						(100 * FLAG_TIMEOUT)
 #define I2C_SPEED 							400000
 

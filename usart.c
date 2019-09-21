@@ -17,7 +17,6 @@
   *           + DMA transfers management
   *           + Interrupts and flags management 
   *           
-  @verbatim       
  ===============================================================================
                         ##### How to use this driver #####
  ===============================================================================
@@ -67,42 +66,10 @@
     This function should be called after enabling the USART clock (RCC_APBxPeriphClockCmd())
     and before calling the function USART_Init().
             
-    @endverbatim        
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
   ******************************************************************************  
   */ 
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
-//#include "stm32f4xx_rcc.h"
-
-/** @addtogroup STM32F4xx_StdPeriph_Driver
-  * @{
-  */
-
-/** @defgroup USART 
-  * @brief USART driver modules
-  * @{
-  */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
 
 /*!< USART CR1 register clear Mask ((~(uint16_t)0xE9F3)) */
 #define CR1_CLEAR_MASK            ((uint16_t)(USART_CR1_M | USART_CR1_PCE | \
@@ -119,19 +86,9 @@
 /*!< USART Interrupts mask */
 #define IT_MASK                   ((uint16_t)0x001F)
 
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-
-/** @defgroup USART_Private_Functions
-  * @{
-  */
-
-/** @defgroup USART_Group1 Initialization and Configuration functions
- *  @brief   Initialization and Configuration functions 
+/*
+ * USART_Group1 Initialization and Configuration functions
  *
-@verbatim   
  ===============================================================================
             ##### Initialization and Configuration functions #####
  ===============================================================================  
@@ -173,17 +130,12 @@
   
     [..]
     These parameters can be configured using the USART_ClockInit() function.
+*/
 
-@endverbatim
-  * @{
-  */
-  
-/**
-  * @brief  Deinitializes the USARTx peripheral registers to their default reset values.
-  * @param  USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
-  *         UART peripheral.
-  * @retval None
-  */
+/*
+ * Deinitializes the USARTx peripheral registers to their default reset values.
+ * USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or UART peripheral.
+ */
 void USART_DeInit(USART_TypeDef* USARTx)
 {
 	if (USARTx == USART1)
@@ -218,15 +170,14 @@ void USART_DeInit(USART_TypeDef* USARTx)
   }
 }
 
-/**
-  * @brief  Initializes the USARTx peripheral according to the specified
-  *         parameters in the USART_InitStruct .
-  * @param  USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
-  *         UART peripheral.
-  * @param  USART_InitStruct: pointer to a USART_InitTypeDef structure that contains
-  *         the configuration information for the specified USART peripheral.
-  * @retval None
-  */
+/*
+ * Initializes the USARTx peripheral according to the specified
+ * parameters in the USART_InitStruct .
+ * USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
+ * UART peripheral.
+ * USART_InitStruct: pointer to a USART_InitTypeDef structure that contains
+ * the configuration information for the specified USART peripheral.
+ */
 void USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct)
 {
   uint32_t tmpreg = 0x00, apbclock = 0x00;
@@ -319,12 +270,11 @@ void USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct)
   USARTx->BRR = (uint16_t)tmpreg;
 }
 
-/**
-  * @brief  Fills each USART_InitStruct member with its default value.
-  * @param  USART_InitStruct: pointer to a USART_InitTypeDef structure which will
-  *         be initialized.
-  * @retval None
-  */
+/*
+ * Fills each USART_InitStruct member with its default value.
+ * USART_InitStruct: pointer to a USART_InitTypeDef structure which will
+ * be initialized.
+ */
 void USART_StructInit(USART_InitTypeDef* USART_InitStruct)
 {
   /* USART_InitStruct members default value */
@@ -336,15 +286,14 @@ void USART_StructInit(USART_InitTypeDef* USART_InitStruct)
   USART_InitStruct->USART_HardwareFlowControl = USART_HardwareFlowControl_None;  
 }
 
-/**
-  * @brief  Initializes the USARTx peripheral Clock according to the 
-  *         specified parameters in the USART_ClockInitStruct .
-  * @param  USARTx: where x can be 1, 2, 3 or 6 to select the USART peripheral.
-  * @param  USART_ClockInitStruct: pointer to a USART_ClockInitTypeDef structure that
-  *         contains the configuration information for the specified  USART peripheral.
-  * @note   The Smart Card and Synchronous modes are not available for UART4 and UART5.    
-  * @retval None
-  */
+/*
+ * Initializes the USARTx peripheral Clock according to the 
+ * specified parameters in the USART_ClockInitStruct .
+ * USARTx: where x can be 1, 2, 3 or 6 to select the USART peripheral.
+ * USART_ClockInitStruct: pointer to a USART_ClockInitTypeDef structure that
+ * contains the configuration information for the specified  USART peripheral.
+ * The Smart Card and Synchronous modes are not available for UART4 and UART5.    
+ */
 void USART_ClockInit(USART_TypeDef* USARTx, USART_ClockInitTypeDef* USART_ClockInitStruct)
 {
   uint32_t tmpreg = 0x00;
@@ -364,12 +313,11 @@ void USART_ClockInit(USART_TypeDef* USARTx, USART_ClockInitTypeDef* USART_ClockI
   USARTx->CR2 = (uint16_t)tmpreg;
 }
 
-/**
-  * @brief  Fills each USART_ClockInitStruct member with its default value.
-  * @param  USART_ClockInitStruct: pointer to a USART_ClockInitTypeDef structure
-  *         which will be initialized.
-  * @retval None
-  */
+/*
+ * Fills each USART_ClockInitStruct member with its default value.
+ * USART_ClockInitStruct: pointer to a USART_ClockInitTypeDef structure
+ * which will be initialized.
+ */
 void USART_ClockStructInit(USART_ClockInitTypeDef* USART_ClockInitStruct)
 {
   /* USART_ClockInitStruct members default value */
@@ -379,14 +327,12 @@ void USART_ClockStructInit(USART_ClockInitTypeDef* USART_ClockInitStruct)
   USART_ClockInitStruct->USART_LastBit = USART_LastBit_Disable;
 }
 
-/**
-  * @brief  Enables or disables the specified USART peripheral.
-  * @param  USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
-  *         UART peripheral.
-  * @param  NewState: new state of the USARTx peripheral.
-  *          This parameter can be: ENABLE or DISABLE.
-  * @retval None
-  */
+/*
+ * Enables or disables the specified USART peripheral.
+ * USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
+ * UART peripheral.
+ * NewState: new state of the USARTx peripheral. This parameter can be: ENABLE or DISABLE.
+ */
 void USART_Cmd(USART_TypeDef* USARTx, FunctionalState NewState)
 { 
   if (NewState != DISABLE)
@@ -401,14 +347,13 @@ void USART_Cmd(USART_TypeDef* USARTx, FunctionalState NewState)
   }
 }
 
-/**
-  * @brief  Sets the system clock prescaler.
-  * @param  USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
-  *         UART peripheral.
-  * @param  USART_Prescaler: specifies the prescaler clock. 
-  * @note   The function is used for IrDA mode with UART4 and UART5.   
-  * @retval None
-  */
+/*
+ * Sets the system clock prescaler.
+ * USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
+ * UART peripheral.
+ * USART_Prescaler: specifies the prescaler clock. 
+ * The function is used for IrDA mode with UART4 and UART5.   
+ */
 void USART_SetPrescaler(USART_TypeDef* USARTx, uint8_t USART_Prescaler)
 { 
   /* Clear the USART prescaler */
@@ -417,16 +362,13 @@ void USART_SetPrescaler(USART_TypeDef* USARTx, uint8_t USART_Prescaler)
   USARTx->GTPR |= USART_Prescaler;
 }
 
-/**
-  * @brief  Enables or disables the USART's 8x oversampling mode.
-  * @note   This function has to be called before calling USART_Init() function
-  *         in order to have correct baudrate Divider value.
-  * @param  USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
-  *         UART peripheral.
-  * @param  NewState: new state of the USART 8x oversampling mode.
-  *          This parameter can be: ENABLE or DISABLE.
-  * @retval None
-  */
+/*
+ * Enables or disables the USART's 8x oversampling mode.
+ * This function has to be called before calling USART_Init() function
+ * in order to have correct baudrate Divider value.
+ * USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or UART peripheral.
+ * NewState: new state of the USART 8x oversampling mode. This parameter can be: ENABLE or DISABLE.
+ */
 void USART_OverSampling8Cmd(USART_TypeDef* USARTx, FunctionalState NewState)
 {
   if (NewState != DISABLE)
@@ -441,14 +383,11 @@ void USART_OverSampling8Cmd(USART_TypeDef* USARTx, FunctionalState NewState)
   }
 }  
 
-/**
-  * @brief  Enables or disables the USART's one bit sampling method.
-  * @param  USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or 
-  *         UART peripheral.
-  * @param  NewState: new state of the USART one bit sampling method.
-  *          This parameter can be: ENABLE or DISABLE.
-  * @retval None
-  */
+/*
+ * Enables or disables the USART's one bit sampling method.
+ * USARTx: where x can be 1, 2, 3, 4, 5, 6, 7 or 8 to select the USART or UART peripheral.
+ * NewState: new state of the USART one bit sampling method. This parameter can be: ENABLE or DISABLE.
+ */
 void USART_OneBitMethodCmd(USART_TypeDef* USARTx, FunctionalState NewState)
 {
   if (NewState != DISABLE)
@@ -463,12 +402,7 @@ void USART_OneBitMethodCmd(USART_TypeDef* USARTx, FunctionalState NewState)
   }
 }
 
-/**
-  * @}
-  */
-
-/** @defgroup USART_Group2 Data transfers functions
- *  @brief   Data transfers functions 
+/** USART_Group2 Data transfers functions Data transfers functions 
  *
 @verbatim   
  ===============================================================================
@@ -1331,20 +1265,36 @@ void USART_ClearITPendingBit(USART_TypeDef* USARTx, uint16_t USART_IT)
   USARTx->SR = (uint16_t)~itmask;
 }
 
-/**
-  * @}
-  */
+void USART1_Init(void)
+{
+	USART_InitTypeDef usartInitStruct;
+	usartInitStruct.USART_BaudRate = USART1_BAUD_RATE;
+  usartInitStruct.USART_WordLength = USART_WordLength_8b;
+  usartInitStruct.USART_StopBits = USART_StopBits_1;
+  usartInitStruct.USART_Parity = USART_Parity_No ;
+  usartInitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  usartInitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	TM_GPIO_InitAlternate(GPIOA, GPIO_Pin_9 | GPIO_Pin_10, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_High, GPIO_AF_USART1);
+	USART_Init(USART1, &usartInitStruct);
+	USART_Cmd(USART1, ENABLE);
+}
 
-/**
-  * @}
-  */
+void USART2_Init(void)
+{
+	USART_InitTypeDef usartInitStruct;
+	usartInitStruct.USART_BaudRate = USART2_BAUD_RATE;
+  usartInitStruct.USART_WordLength = USART_WordLength_8b;
+  usartInitStruct.USART_StopBits = USART_StopBits_1;
+  usartInitStruct.USART_Parity = USART_Parity_No ;
+  usartInitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  usartInitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	TM_GPIO_InitAlternate(GPIOA, GPIO_Pin_2 | GPIO_Pin_3, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_High, GPIO_AF_USART2);
+	USART_Init(USART2, &usartInitStruct);
+	USART_Cmd(USART2, ENABLE);
+}
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

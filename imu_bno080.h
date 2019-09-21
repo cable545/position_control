@@ -5,7 +5,7 @@
 #define BNO080_ADDRESS1 0x4A
 
 #define IMU_I2C 									I2C1
-#define BNO080_RESET_PIN					GPIO_PIN_6
+#define BNO080_RESET_PIN					GPIO_PIN_15
 #define BNO080_RESET_GPIO_PORT		GPIOA
 
 //Registers
@@ -77,7 +77,8 @@ public:
 	IMU_BNO080(uint8_t deviceAddress = BNO080_ADDRESS0);
 	~IMU_BNO080();
 
-	bool begin(); // By default use the default I2C addres, and use Wire port
+	bool begin(bool executeLowLevelInit); // By default use the default I2C addres, and use Wire port
+	void readImuData(ImuData* actualImuData);
 
 	void enableDebugging(); // Turn on debug printing. If user doesn't specify then Serial will be used.
 
@@ -164,7 +165,6 @@ public:
 	uint8_t sequenceNumber[6]; // There are 6 com channels. Each channel has its own seqnum
 	uint8_t commandSequenceNumber; // Commands have a seqNum as well. These are inside command packet, the header uses its own seqNum per channel
 	uint32_t metaData[MAX_METADATA_SIZE]; // There is more than 10 words in a metadata record but we'll stop at Q point 3
-
 	
 private:
 	bool lowLevelInit();

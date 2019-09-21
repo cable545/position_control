@@ -1,11 +1,11 @@
 #include "main.h"
 
-bool Buzzer::isDifferentialDrive = false;
-bool Buzzer::isInitialized = false;
+bool Buzzer::differentialMode = false;
+bool Buzzer::initialized = false;
 
-void Buzzer::beepBuzzer()
+void Buzzer::beep()
 {
-	if(isDifferentialDrive)
+	if(differentialMode)
 	{
 		for(int i = 4000; i > 0; i--)
 		{
@@ -29,16 +29,12 @@ void Buzzer::beepBuzzer()
 	}
 }
 
-void Buzzer::initBuzzer(bool differentialDrive)
+void Buzzer::init(const bool activateDifferentialMode)
 {
-	isDifferentialDrive = differentialDrive;
+	differentialMode = activateDifferentialMode;
 	
-	if(isDifferentialDrive)
+	if(differentialMode)
 	{
-		/*
-		 * initialzed the gpio port 5 and 6 from gpio modul a as an output
-		 * and enables the clock from gpioa
-		 */
 		TM_GPIO_Init(
 			BUZZER_GPIO_PORT,
 			BUZZER_GPIO_PIN | BUZZER_DIFF_GPIO_PIN,
@@ -60,16 +56,16 @@ void Buzzer::initBuzzer(bool differentialDrive)
 		);
 	}
 	
-	isInitialized = true;
+	initialized = true;
 }
 
-uint32_t Buzzer::buzzerBeepXTimes(uint32_t count)
+uint32_t Buzzer::beepXTimes(uint32_t times)
 {
-	if(!isInitialized) return BUZZER_NOT_INITIALIZED;
+	if(!initialized) return BUZZER_NOT_INITIALIZED;
 	
-	for(int i = count; i > 0; i--)
+	for(uint32_t i = times; i > 0; i--)
 	{
-		beepBuzzer();
+		beep();
 		delay(500);
 	}
 	

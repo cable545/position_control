@@ -30,23 +30,27 @@
 #define MOTOR_C 												0x4
 #define MOTOR_D 												0x8
 
-//#define MOTOR_DRIVER_2_TIMER_GPIO_PORT
-//#define MOTOR_DRIVER_3_TIMER_GPIO_PORT
-//#define MOTOR_DRIVER_4_TIMER_GPIO_PORT
-
 class MotorDriver
 {
-	private:
-		TIM_TypeDef* timerPointer;
-		bool limitOutput;
-		
-		void initTimer();
-		void initGPIO();
+public:
+	static MotorDriver& instance();
+	~MotorDriver() {}
+
+	void init(TIM_TypeDef* timerPointer);
+	void setPulse(uint32_t pulse, uint8_t motors);
 	
-	public:
-		MotorDriver(TIM_TypeDef* timerPointer);
-		void init();
-		void setPulse(uint32_t pulse, uint8_t motors);
+private:
+	MotorDriver() {}
+	MotorDriver(const MotorDriver&);
+	MotorDriver & operator = (const MotorDriver &);
+	
+	TIM_TypeDef* timerPointer;
+	bool limitOutput;
+		
+	void initTimer();
+	void initGPIO();
+	
+	
 };
 
 #endif

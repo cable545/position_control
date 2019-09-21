@@ -157,6 +157,12 @@ void Debug::ftoa(float n, uint8_t string[], uint8_t afterpoint)
 	}
 }
 
+void Debug::routeSysclockToPC9()
+{
+	TM_GPIO_Init(GPIOC, GPIO_PIN_9, TM_GPIO_Mode_AF, TM_GPIO_OType_PP, TM_GPIO_PuPd_NOPULL, TM_GPIO_Speed_High);
+	RCC_MCO2Config(RCC_MCO2Source_SYSCLK, RCC_MCO2Div_1);
+}
+
 
 
 

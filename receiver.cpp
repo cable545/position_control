@@ -1,15 +1,11 @@
 #include "main.h"
 
-uint32_t Receiver::capturedValue[CAPTURE_VALUE_TARGET_CNT];
-uint32_t Receiver::capturedValues[CAPTURE_VALUE_TARGET_CNT];
-TargetValues Receiver::targetValues;
-uint32_t Receiver::values[RECEIVER_CHANNEL_CNT];
-bool Receiver::bufferFull;
+static uint32_t sumSignalIndex = 0;
+
+/********************* Interrupt Handler *******************/
 
 extern "C"
 {
-	static uint32_t sumSignalIndex = 0;
-	
   void TIM1_CC_IRQHandler()
 	{
 		if(Timer::getInterruptStatus(RECEIVER_TIMER, TIM_IT_CC1) == SET)
@@ -21,13 +17,9 @@ extern "C"
 			tmp = Timer::getCapture1(RECEIVER_TIMER);
 			
 			if(tmp > 2000)
-			{
 				sumSignalIndex = 0;
-			}
 			else
-			{
-				Receiver::capturedValue[sumSignalIndex++] = tmp;
-			}
+				Receiver::instance().addCapturedValue(tmp, sumSignalIndex++);
 		}
 	}
 	
@@ -36,10 +28,37 @@ extern "C"
 		if(DMA::getInterruptStatus(RECEIVER_DMA_STREAM, RECEIVER_DMA_IRQ_SC) == SET)
 		{
 			DMA::clearInterruptPendingBit(RECEIVER_DMA_STREAM, RECEIVER_DMA_IRQ_SC);
-			Receiver::bufferFull = true;
+			Receiver::instance().setBufferFull(true);
 			RECEIVER_TIMER->CNT = 0;
 		}
 	}
+}
+
+/********************* Methods *******************/
+
+Receiver& Receiver::instance()
+{
+	static Receiver _instance;
+	
+	return _instance;
+}
+
+uint32_t Receiver::init(bool enableInterrupt, bool enableDMA)
+{
+	uint32_t result;
+	
+	initGPIO();
+	
+	result = initTimer(enableInterrupt, enableDMA);
+	if(result != EXIT_SUCCESS) return result;
+	
+	if(enableDMA)
+	{
+		initDMA();
+		initDMAInterrupt();
+	}
+	
+	return EXIT_SUCCESS;
 }
 
 void Receiver::initGPIO()
@@ -52,26 +71,6 @@ void Receiver::initGPIO()
 		TM_GPIO_Speed_High,
 		RECEIVER_GPIO_AF_FUNCTION
 	);
-}
-
-void Receiver::initInterrupt()
-{
-	NVIC_InitTypeDef NVIC_InitStruct;
-	NVIC_InitStruct.NVIC_IRQChannel = TIM1_CC_IRQn;
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
-  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-  Interrupt::init(&NVIC_InitStruct);
-}
-
-void Receiver::initDMAInterrupt()
-{
-	NVIC_InitTypeDef NVIC_InitStruct;
-	NVIC_InitStruct.NVIC_IRQChannel = RECEIVER_DMA_IRQ_NR;
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
-  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-  Interrupt::init(&NVIC_InitStruct);
 }
 
 uint32_t Receiver::initTimer(bool enableInterrupt, bool enableDMA)
@@ -113,6 +112,15 @@ uint32_t Receiver::initTimer(bool enableInterrupt, bool enableDMA)
 	return EXIT_SUCCESS;
 }
 
+void Receiver::initInterrupt()
+{
+	NVIC_InitTypeDef NVIC_InitStruct;
+	NVIC_InitStruct.NVIC_IRQChannel = TIM1_CC_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  Interrupt::init(&NVIC_InitStruct);
+}
 
 void Receiver::initDMA()
 {
@@ -126,7 +134,7 @@ void Receiver::initDMA()
 	
 	DMA_InitStruct.DMA_Channel = RECEIVER_DMA_CHANNEL;
 	DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t) &RECEIVER_TIMER->CCR1;
-	DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &Receiver::capturedValues;
+	DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &capturedValues;
 	
 	DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralToMemory;
 	DMA_InitStruct.DMA_BufferSize = BUFFER_SIZE;
@@ -148,20 +156,14 @@ void Receiver::initDMA()
 	DMA::enableDisable(RECEIVER_DMA_STREAM, ENABLE);
 }
 
-uint32_t Receiver::init(bool enableInterrupt, bool enableDMA)
+void Receiver::initDMAInterrupt()
 {
-	uint32_t result;
-	
-	initGPIO();
-	
-	result = initTimer(enableInterrupt, enableDMA);
-	if(result != EXIT_SUCCESS) return result;
-	
-	if(enableDMA) initDMA();
-	
-	initDMAInterrupt();
-	
-	return EXIT_SUCCESS;
+	NVIC_InitTypeDef NVIC_InitStruct;
+	NVIC_InitStruct.NVIC_IRQChannel = RECEIVER_DMA_IRQ_NR;
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  Interrupt::init(&NVIC_InitStruct);
 }
 
 bool Receiver::processCapturedValues()
@@ -175,29 +177,31 @@ bool Receiver::processCapturedValues()
 		for(uint32_t i = 0; i < CAPTURE_VALUE_TARGET_CNT; i++)
 		{
 			if(i == 0)
-				tmpValues[i] = Receiver::capturedValues[i];
+				tmpValues[i] = capturedValues[i];
 			else
-				tmpValues[i] = Receiver::capturedValues[i] - Receiver::capturedValues[i - 1];
+				tmpValues[i] = capturedValues[i] - capturedValues[i - 1];
 			
-			if(Receiver::isSyncSignalValue(tmpValues[i])) syncSignalIndex = i;
+			if(isSyncSignalValue(tmpValues[i]))
+				syncSignalIndex = i;
 		}
 		
 		if(syncSignalIndex == 0 || syncSignalIndex == CAPTURE_VALUE_TARGET_CNT - 1)
 		{
 			offset = (syncSignalIndex == 0) ? 1 : 0;
 			
-			for(uint32_t i = 0; i < RECEIVER_CHANNEL_CNT; i++) Receiver::values[i] = tmpValues[i + offset];
+			for(uint32_t i = 0; i < RECEIVER_CHANNEL_CNT; i++)
+				processedValues[i] = tmpValues[i + offset];
 		}
 		else
 		{
 			for(uint32_t i = 0, j = syncSignalIndex + 1; i < RECEIVER_CHANNEL_CNT; j++)
 			{
 				if(j >= CAPTURE_VALUE_TARGET_CNT) j = 0;
-				Receiver::values[i++] = tmpValues[j];
+				processedValues[i++] = tmpValues[j];
 			}
 		}
 		
-		Receiver::fillTargetValues();
+		fillTargetValues();
 		
 		bufferFull = false;
 		
@@ -219,10 +223,23 @@ bool Receiver::isSyncSignalValue(uint32_t value)
 	return value > CHANNEL_VALUE_COUNT_MAX;
 }
 
+bool Receiver::addCapturedValue(uint32_t value, uint32_t index)
+{
+	if(index >= CAPTURE_VALUE_TARGET_CNT)
+		return false;
+	
+	capturedValues[index] = value;
+	
+	return true;
+}
+
 void Receiver::fillTargetValues()
 {
-	Receiver::targetValues.elevator = Receiver::values[0];
-	Receiver::targetValues.roll = Maths::map(Receiver::values[1], CHANNEL_VALUE_COUNT_MIN, CHANNEL_VALUE_COUNT_MAX, ROLL_ANGLE_MIN, ROLL_ANGLE_MAX);
-	Receiver::targetValues.pitch = Maths::map(Receiver::values[2], CHANNEL_VALUE_COUNT_MIN, CHANNEL_VALUE_COUNT_MAX, PITCH_ANGLE_MIN, PITCH_ANGLE_MAX);
-	Receiver::targetValues.yaw = Maths::map(Receiver::values[3], CHANNEL_VALUE_COUNT_MIN, CHANNEL_VALUE_COUNT_MAX, YAW_RATE_MIN, YAW_RATE_MAX);
+	targetValues.elevator = processedValues[0];
+	targetValues.rollRaw = processedValues[1];
+	targetValues.pitchRaw = processedValues[2];
+	targetValues.yawRaw = processedValues[3];
+	targetValues.rollAngle = Maths::map(processedValues[1], CHANNEL_VALUE_COUNT_MIN, CHANNEL_VALUE_COUNT_MAX, ROLL_ANGLE_MIN, ROLL_ANGLE_MAX);
+	targetValues.pitchAngle = Maths::map(processedValues[2], CHANNEL_VALUE_COUNT_MIN, CHANNEL_VALUE_COUNT_MAX, PITCH_ANGLE_MIN, PITCH_ANGLE_MAX);
+	targetValues.yawAngle = Maths::map(processedValues[3], CHANNEL_VALUE_COUNT_MIN, CHANNEL_VALUE_COUNT_MAX, YAW_RATE_MIN, YAW_RATE_MAX);
 }

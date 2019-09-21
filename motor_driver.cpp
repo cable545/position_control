@@ -1,13 +1,16 @@
 #include "main.h"
 
-MotorDriver::MotorDriver(TIM_TypeDef* timerPointer)
+MotorDriver& MotorDriver::instance()
+{
+	static MotorDriver _instance;
+	
+	return _instance;
+}
+
+void MotorDriver::init(TIM_TypeDef* timerPointer)
 {
 	this->timerPointer = timerPointer;
 	this->limitOutput = LIMIT_OUTPUT == 1 ? true : false;
-}
-
-void MotorDriver::init()
-{
 	this->initGPIO();
 	this->initTimer();
 }

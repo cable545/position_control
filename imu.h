@@ -6,12 +6,24 @@
 #define IMU_I2C_SCL_GPIO_PIN			GPIO_Pin_8
 #define IMU_I2C_SDA_GPIO_PIN			GPIO_Pin_9
 
+typedef struct
+{
+	int32_t rollAngle;
+	int32_t pitchAngle;
+	int32_t yawAngle;
+	uint16_t rollRaw;
+	uint16_t pitchRaw;
+	uint16_t yawRaw;
+	float gyroX;
+	float gyroY;
+	float gyroZ;
+} ImuData;
+
 class ImuSettings;
 
 class Imu
 {
 public:
-		
 	static Imu* createImu(ImuSettings* settings);
 
 	Imu(ImuSettings* settings);
@@ -27,6 +39,7 @@ public:
 	inline uint32_t getTimestamp() {return m_timestamp;} 				// and the timestamp for it
 
 	inline bool gyroBiasValid() {return m_gyroBiasValid;}
+	
 protected:
 	void gyroBiasInit();												// sets up gyro bias calculation
 	void handleGyroBias();											// adjust gyro for bias

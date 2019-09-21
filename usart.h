@@ -1,32 +1,3 @@
-/**
-  ******************************************************************************
-  * @file    stm32f4xx_usart.h
-  * @author  MCD Application Team
-  * @version V1.7.1
-  * @date    20-May-2016
-  * @brief   This file contains all the functions prototypes for the USART 
-  *          firmware library.    
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************  
-  */ 
-
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USART_H
 #define __USART_H
 
@@ -34,25 +5,14 @@
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+#define USART1_BAUD_RATE 115200
+#define USART2_BAUD_RATE USART1_BAUD_RATE
 
-	 
-/** @addtogroup STM32F4xx_StdPeriph_Driver
-  * @{
-  */
-
-/** @addtogroup USART
-  * @{
-  */ 
-
-/* Exported types ------------------------------------------------------------*/ 
-
-/** 
-  * @brief  USART Init Structure definition  
-  */ 
-  
+/* 
+ * USART Init Structure definition  
+ */ 
 typedef struct
 {
   uint32_t USART_BaudRate;            /*!< This member configures the USART communication baud rate.
@@ -62,30 +22,29 @@ typedef struct
                                            Where OVR8 is the "oversampling by 8 mode" configuration bit in the CR1 register. */
 
   uint16_t USART_WordLength;          /*!< Specifies the number of data bits transmitted or received in a frame.
-                                           This parameter can be a value of @ref USART_Word_Length */
+                                           This parameter can be a value of USART_Word_Length */
 
   uint16_t USART_StopBits;            /*!< Specifies the number of stop bits transmitted.
-                                           This parameter can be a value of @ref USART_Stop_Bits */
+                                           This parameter can be a value of USART_Stop_Bits */
 
   uint16_t USART_Parity;              /*!< Specifies the parity mode.
-                                           This parameter can be a value of @ref USART_Parity
-                                           @note When parity is enabled, the computed parity is inserted
+                                           This parameter can be a value of USART_Parity
+																								 note When parity is enabled, the computed parity is inserted
                                                  at the MSB position of the transmitted data (9th bit when
                                                  the word length is set to 9 data bits; 8th bit when the
                                                  word length is set to 8 data bits). */
  
   uint16_t USART_Mode;                /*!< Specifies whether the Receive or Transmit mode is enabled or disabled.
-                                           This parameter can be a value of @ref USART_Mode */
+                                           This parameter can be a value of USART_Mode */
 
   uint16_t USART_HardwareFlowControl; /*!< Specifies wether the hardware flow control mode is enabled
                                            or disabled.
-                                           This parameter can be a value of @ref USART_Hardware_Flow_Control */
+                                           This parameter can be a value of USART_Hardware_Flow_Control */
 } USART_InitTypeDef;
 
-/** 
-  * @brief  USART Clock Init Structure definition  
-  */ 
-  
+/*
+ * USART Clock Init Structure definition  
+ */ 
 typedef struct
 {
 
@@ -103,12 +62,9 @@ typedef struct
                                This parameter can be a value of @ref USART_Last_Bit */
 } USART_ClockInitTypeDef;
 
-/* Exported constants --------------------------------------------------------*/
-
-/** @defgroup USART_Exported_Constants
-  * @{
-  */ 
-  
+/*
+ * USART_Exported_Constants
+ */ 
 #define IS_USART_ALL_PERIPH(PERIPH) (((PERIPH) == USART1) || \
                                      ((PERIPH) == USART2) || \
                                      ((PERIPH) == USART3) || \
@@ -123,23 +79,18 @@ typedef struct
                                       ((PERIPH) == USART3) || \
                                       ((PERIPH) == USART6))
 
-/** @defgroup USART_Word_Length 
-  * @{
-  */ 
-  
+/*
+ * USART_Word_Length 
+ */ 
 #define USART_WordLength_8b                  ((uint16_t)0x0000)
 #define USART_WordLength_9b                  ((uint16_t)0x1000)
                                     
 #define IS_USART_WORD_LENGTH(LENGTH) (((LENGTH) == USART_WordLength_8b) || \
                                       ((LENGTH) == USART_WordLength_9b))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Stop_Bits 
-  * @{
-  */ 
-  
+/*
+ * USART_Stop_Bits 
+ */ 
 #define USART_StopBits_1                     ((uint16_t)0x0000)
 #define USART_StopBits_0_5                   ((uint16_t)0x1000)
 #define USART_StopBits_2                     ((uint16_t)0x2000)
@@ -148,38 +99,27 @@ typedef struct
                                      ((STOPBITS) == USART_StopBits_0_5) || \
                                      ((STOPBITS) == USART_StopBits_2) || \
                                      ((STOPBITS) == USART_StopBits_1_5))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Parity 
-  * @{
-  */ 
-  
+/*
+ * USART_Parity 
+ */ 
 #define USART_Parity_No                      ((uint16_t)0x0000)
 #define USART_Parity_Even                    ((uint16_t)0x0400)
 #define USART_Parity_Odd                     ((uint16_t)0x0600) 
 #define IS_USART_PARITY(PARITY) (((PARITY) == USART_Parity_No) || \
                                  ((PARITY) == USART_Parity_Even) || \
                                  ((PARITY) == USART_Parity_Odd))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Mode 
-  * @{
-  */ 
-  
+/*
+ * USART_Mode 
+ */ 
 #define USART_Mode_Rx                        ((uint16_t)0x0004)
 #define USART_Mode_Tx                        ((uint16_t)0x0008)
 #define IS_USART_MODE(MODE) ((((MODE) & (uint16_t)0xFFF3) == 0x00) && ((MODE) != (uint16_t)0x00))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Hardware_Flow_Control 
-  * @{
-  */ 
+/*
+ * USART_Hardware_Flow_Control 
+ */ 
 #define USART_HardwareFlowControl_None       ((uint16_t)0x0000)
 #define USART_HardwareFlowControl_RTS        ((uint16_t)0x0100)
 #define USART_HardwareFlowControl_CTS        ((uint16_t)0x0200)
@@ -189,61 +129,40 @@ typedef struct
                                ((CONTROL) == USART_HardwareFlowControl_RTS) || \
                                ((CONTROL) == USART_HardwareFlowControl_CTS) || \
                                ((CONTROL) == USART_HardwareFlowControl_RTS_CTS))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Clock 
-  * @{
-  */ 
+/*
+ * USART_Clock 
+ */ 
 #define USART_Clock_Disable                  ((uint16_t)0x0000)
 #define USART_Clock_Enable                   ((uint16_t)0x0800)
 #define IS_USART_CLOCK(CLOCK) (((CLOCK) == USART_Clock_Disable) || \
                                ((CLOCK) == USART_Clock_Enable))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Clock_Polarity 
-  * @{
-  */
-  
+/*
+ * USART_Clock_Polarity 
+ */
 #define USART_CPOL_Low                       ((uint16_t)0x0000)
 #define USART_CPOL_High                      ((uint16_t)0x0400)
 #define IS_USART_CPOL(CPOL) (((CPOL) == USART_CPOL_Low) || ((CPOL) == USART_CPOL_High))
 
-/**
-  * @}
-  */ 
-
-/** @defgroup USART_Clock_Phase
-  * @{
-  */
-
+/*
+ * USART_Clock_Phase
+ */
 #define USART_CPHA_1Edge                     ((uint16_t)0x0000)
 #define USART_CPHA_2Edge                     ((uint16_t)0x0200)
 #define IS_USART_CPHA(CPHA) (((CPHA) == USART_CPHA_1Edge) || ((CPHA) == USART_CPHA_2Edge))
 
-/**
-  * @}
-  */
-
-/** @defgroup USART_Last_Bit
-  * @{
-  */
-
+/*
+ * USART_Last_Bit
+ */
 #define USART_LastBit_Disable                ((uint16_t)0x0000)
 #define USART_LastBit_Enable                 ((uint16_t)0x0100)
 #define IS_USART_LASTBIT(LASTBIT) (((LASTBIT) == USART_LastBit_Disable) || \
                                    ((LASTBIT) == USART_LastBit_Enable))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Interrupt_definition 
-  * @{
-  */
-  
+/*
+ * USART_Interrupt_definition 
+ */
 #define USART_IT_PE                          ((uint16_t)0x0028)
 #define USART_IT_TXE                         ((uint16_t)0x0727)
 #define USART_IT_TC                          ((uint16_t)0x0626)
@@ -257,13 +176,10 @@ typedef struct
 #define USART_IT_NE                          ((uint16_t)0x0260)
 #define USART_IT_FE                          ((uint16_t)0x0160)
 
-/** @defgroup USART_Legacy 
-  * @{
-  */
+/*
+ * USART_Legacy 
+ */
 #define USART_IT_ORE                          USART_IT_ORE_ER               
-/**
-  * @}
-  */
 
 #define IS_USART_CONFIG_IT(IT) (((IT) == USART_IT_PE) || ((IT) == USART_IT_TXE) || \
                                 ((IT) == USART_IT_TC) || ((IT) == USART_IT_RXNE) || \
@@ -277,63 +193,43 @@ typedef struct
                              ((IT) == USART_IT_NE) || ((IT) == USART_IT_FE))
 #define IS_USART_CLEAR_IT(IT) (((IT) == USART_IT_TC) || ((IT) == USART_IT_RXNE) || \
                                ((IT) == USART_IT_LBD) || ((IT) == USART_IT_CTS))
-/**
-  * @}
-  */
-
-/** @defgroup USART_DMA_Requests 
-  * @{
-  */
+															 
+/*
+ * USART_DMA_Requests 
+ */
 
 #define USART_DMAReq_Tx                      ((uint16_t)0x0080)
 #define USART_DMAReq_Rx                      ((uint16_t)0x0040)
 #define IS_USART_DMAREQ(DMAREQ) ((((DMAREQ) & (uint16_t)0xFF3F) == 0x00) && ((DMAREQ) != (uint16_t)0x00))
 
-/**
-  * @}
-  */ 
-
-/** @defgroup USART_WakeUp_methods
-  * @{
-  */
-
+/*
+ * USART_WakeUp_methods
+ */
 #define USART_WakeUp_IdleLine                ((uint16_t)0x0000)
 #define USART_WakeUp_AddressMark             ((uint16_t)0x0800)
 #define IS_USART_WAKEUP(WAKEUP) (((WAKEUP) == USART_WakeUp_IdleLine) || \
                                  ((WAKEUP) == USART_WakeUp_AddressMark))
-/**
-  * @}
-  */
 
-/** @defgroup USART_LIN_Break_Detection_Length 
-  * @{
-  */
-  
+/*
+ * USART_LIN_Break_Detection_Length 
+ */
 #define USART_LINBreakDetectLength_10b      ((uint16_t)0x0000)
 #define USART_LINBreakDetectLength_11b      ((uint16_t)0x0020)
 #define IS_USART_LIN_BREAK_DETECT_LENGTH(LENGTH) \
                                (((LENGTH) == USART_LINBreakDetectLength_10b) || \
                                 ((LENGTH) == USART_LINBreakDetectLength_11b))
-/**
-  * @}
-  */
 
-/** @defgroup USART_IrDA_Low_Power 
-  * @{
-  */
-
+/*
+ * USART_IrDA_Low_Power 
+ */
 #define USART_IrDAMode_LowPower              ((uint16_t)0x0004)
 #define USART_IrDAMode_Normal                ((uint16_t)0x0000)
 #define IS_USART_IRDA_MODE(MODE) (((MODE) == USART_IrDAMode_LowPower) || \
                                   ((MODE) == USART_IrDAMode_Normal))
-/**
-  * @}
-  */ 
 
-/** @defgroup USART_Flags 
-  * @{
-  */
-
+/*
+ * USART_Flags 
+ */
 #define USART_FLAG_CTS                       ((uint16_t)0x0200)
 #define USART_FLAG_LBD                       ((uint16_t)0x0100)
 #define USART_FLAG_TXE                       ((uint16_t)0x0080)
@@ -355,17 +251,6 @@ typedef struct
 #define IS_USART_BAUDRATE(BAUDRATE) (((BAUDRATE) > 0) && ((BAUDRATE) < 7500001))
 #define IS_USART_ADDRESS(ADDRESS) ((ADDRESS) <= 0xF)
 #define IS_USART_DATA(DATA) ((DATA) <= 0x1FF)
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
-
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions --------------------------------------------------------*/  
 
 /*  Function used to set the USART configuration to the default reset state ***/ 
 void USART_DeInit(USART_TypeDef* USARTx);
@@ -418,18 +303,11 @@ void USART_ClearFlag(USART_TypeDef* USARTx, uint16_t USART_FLAG);
 ITStatus USART_GetITStatus(USART_TypeDef* USARTx, uint16_t USART_IT);
 void USART_ClearITPendingBit(USART_TypeDef* USARTx, uint16_t USART_IT);
 
+void USART1_Init(void);
+void USART2_Init(void);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __STM32F4xx_USART_H */
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+#endif

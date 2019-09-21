@@ -19,6 +19,7 @@ public:
 	static void print(const char* string, ...);
 	static void println(const char* string, ...);
 	static void ftoa(float n, uint8_t string[], uint8_t afterpoint);
+	static void routeSysclockToPC9();
 };
 
 #endif
